@@ -175,7 +175,7 @@ func (r Reconciler) reconcileControllersAndVPAs(ns *corev1.Namespace, vpas []vpa
 		var cvpa *vpav1.VerticalPodAutoscaler
 		// search for the matching vpa (will have the same name)
 		for idx, vpa := range vpas {
-			if fmt.Sprintf("goldilocks-%s", controller.Name) == vpa.Name {
+			if fmt.Sprintf("%s-%s", utils.ReadSource(), controller.Name) == vpa.Name {
 				// found the vpa associated with this controller
 				cvpa = &vpas[idx]
 				vpaHasAssociatedController[cvpa.Name] = true
@@ -345,7 +345,7 @@ func (r Reconciler) getVPAObject(existingVPA *vpav1.VerticalPodAutoscaler, ns *c
 	if existingVPA == nil {
 		desiredVPA = vpav1.VerticalPodAutoscaler{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      "goldilocks-" + controller.Name,
+				Name:      utils.ReadSource() + "-" + controller.Name,
 				Namespace: ns.Name,
 			},
 		}

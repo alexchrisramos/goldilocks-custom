@@ -15,13 +15,19 @@
 package utils
 
 import (
+	"log"
+	"os"
+	"strings"
+
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 
+var labelOrAnnotationBase = ReadBase()
+
 var (
 	// LabelBase is the string that will be used for labels on namespaces
-	LabelOrAnnotationBase = "goldilocks.fairwinds.com"
+	LabelOrAnnotationBase = labelOrAnnotationBase
 	// VpaEnabledLabel is the label used to indicate that Goldilocks is enabled.
 	VpaEnabledLabel = LabelOrAnnotationBase + "/" + "enabled"
 	// VpaUpdateModeKey is the label used to indicate the vpa update mode.
@@ -36,8 +42,8 @@ var (
 
 // VPALabels is a set of default labels that get placed on every VPA.
 var VPALabels = map[string]string{
-	"creator": "Fairwinds",
-	"source":  "goldilocks",
+	"creator": labelOrAnnotationBase,
+	"source":  labelOrAnnotationBase,
 }
 
 // An Event represents an update of a Kubernetes object and contains metadata about the update.
@@ -96,4 +102,20 @@ func FormatResourceList(rl v1.ResourceList) v1.ResourceList {
 		rl[v1.ResourceMemory] = mem
 	}
 	return rl
+}
+
+// Read LabelOrAnnotationBase from configMap.
+func ReadBase() string {
+	data, err := os.ReadFile("/etc/config/labelOrAnnotationBase")
+	if err != nil {
+		log.Printf("labelOrAnnotationBase not provided, defaulting to goldilocks.fairwinds.com: %v", err)
+		return "goldilocks.fairwinds.com" // Default value
+	}
+	return string(data)
+}
+
+func ReadSource() string {
+	data := ReadBase()
+	basePart := strings.Split(data, ".")
+	return string(basePart[0])
 }
