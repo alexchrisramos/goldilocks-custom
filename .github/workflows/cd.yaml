@@ -41,7 +41,7 @@ jobs:
       # Build the Docker image with version tags
       - name: Build Docker Image
         run: |
-          make docker-build
+          make build-docker
 
       # Tag the Docker image with version and latest tags
       - name: Tag Docker Image
